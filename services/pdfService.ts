@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable, { applyPlugin } from 'jspdf-autotable';
 import { 
   Transaction, 
   TransactionType, 
@@ -9,6 +9,13 @@ import {
   DebtAgreementParams
 } from '../types';
 import { CONDO_INFO, UNITS } from '../constants';
+
+// Garantir vinculação do plugin no protótipo do jsPDF
+try {
+  applyPlugin(jsPDF);
+} catch {
+  // Ignorar caso já esteja registrado
+}
 
 export const generateFinancialReport = (
   transactions: Transaction[], 
@@ -52,7 +59,7 @@ export const generateFinancialReport = (
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   // Tabela Sintética de Consolidação
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 47,
     head: [['Demonstrativo Sintético de Resultados', 'Valor Consolidado (R$)']],
     body: [
@@ -86,7 +93,7 @@ export const generateFinancialReport = (
       : `- R$ ${t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
   ]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: (doc as any).lastAutoTable.finalY + 14,
     head: [['Data', 'Descrição', 'Unid.', 'Categoria', 'Doc/Comprovante', 'Valor Líquido']],
     body: tableData,
@@ -136,7 +143,7 @@ export const generateFinancialReport = (
     ];
   });
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: startYUnits + 4,
     head: [['Unidade', 'Pavimento', 'Fração Ideal', 'Status no Período', 'Valor Ordinário + F.R.']],
     body: unitsStatus,
@@ -392,7 +399,7 @@ export const generateLateFeeSimulationPDF = (
     `R$ ${item.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
   ]);
 
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 87,
     margin: { left: 14, right: 14, top: 26, bottom: 18 },
     head: [['Competência', 'Vencimento', 'Dias Atraso', 'Valor Original', 'Multa', 'Juros', 'Total']],
@@ -646,7 +653,7 @@ export const generateDebtAgreementPDF = (
   );
 
   // Tabela de Valores
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: curY,
     head: [['Discriminação do Débito', 'Composição Financeira (R$)']],
     body: [

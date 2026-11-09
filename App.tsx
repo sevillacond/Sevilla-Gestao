@@ -4,7 +4,7 @@ import {
   ShieldCheck, Sparkles, PlusCircle, RefreshCcw, Trash2, 
   CheckCircle2, Info, Filter, Calendar, Search, XCircle,
   Building2, Coins, ArrowUpRight, Download, CreditCard, ChevronRight,
-  Menu, X, Globe, Calculator
+  Menu, X, Globe, Calculator, AlertCircle
 } from 'lucide-react';
 import { 
   Transaction, TransactionType, CondoState, UnitId, 
@@ -46,6 +46,13 @@ const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    confirmVariant?: 'danger' | 'primary';
+    onConfirm: () => void;
+  } | null>(null);
 
   const handleOpenSimulatorForUnit = (unitId: UnitId) => {
     setSimulatorTargetUnit(unitId);
@@ -199,15 +206,22 @@ const App: React.FC = () => {
     setToast({ message: 'Auditoria contábil do Síndico concluída!', type: 'info' });
   };
 
-  // Excluir lançamento
+  // Excluir lançamento com confirmação in-app
   const handleDeleteTransaction = (id: string) => {
-    if (window.confirm('Confirma a anulação contábil desta transação?')) {
-      setState(prev => ({
-        ...prev,
-        transactions: prev.transactions.filter(t => t.id !== id)
-      }));
-      setToast({ message: 'Lançamento estornado.', type: 'info' });
-    }
+    setConfirmDialog({
+      title: 'Anulação Contábil de Lançamento',
+      message: 'Confirma o estorno contábil definitivo desta transação? O saldo do livro caixa será recalculado.',
+      confirmLabel: 'Estornar Lançamento',
+      confirmVariant: 'danger',
+      onConfirm: () => {
+        setState(prev => ({
+          ...prev,
+          transactions: prev.transactions.filter(t => t.id !== id)
+        }));
+        setToast({ message: 'Lançamento estornado.', type: 'info' });
+        setConfirmDialog(null);
+      }
+    });
   };
 
   // Atualizar laudo de inspeção predial
@@ -228,13 +242,20 @@ const App: React.FC = () => {
     setToast({ message: `Documento "${newDoc.title}" registrado no dossiê oficial!`, type: 'success' });
   };
 
-  // Restaurar dados padrão de auditoria
+  // Restaurar dados padrão de auditoria com confirmação in-app
   const handleResetData = () => {
-    if (window.confirm('Deseja recarregar a base auditada do Condomínio Residencial Sevilla (12 unidades)?')) {
-      setState(INITIAL_CONDO_STATE);
-      setAiAnalysis(null);
-      setToast({ message: 'Dados do Condomínio Residencial Sevilla recarregados!', type: 'success' });
-    }
+    setConfirmDialog({
+      title: 'Recarregar Base Auditada',
+      message: 'Deseja restaurar a base oficial de auditoria do Condomínio Residencial Sevilla (12 unidades, contratos e laudos)? Todos os lançamentos serão restaurados para a versão homologada.',
+      confirmLabel: 'Recarregar Dados',
+      confirmVariant: 'primary',
+      onConfirm: () => {
+        setState(INITIAL_CONDO_STATE);
+        setAiAnalysis(null);
+        setToast({ message: 'Dados do Condomínio Residencial Sevilla recarregados!', type: 'success' });
+        setConfirmDialog(null);
+      }
+    });
   };
 
   interface NavItem {
@@ -1134,6 +1155,49 @@ const App: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação In-App (Substitui window.confirm para funcionar em iframes restritos) */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                confirmDialog.confirmVariant === 'danger' 
+                  ? 'bg-rose-100 text-rose-600' 
+                  : 'bg-indigo-100 text-indigo-600'
+              }`}>
+                <AlertCircle size={20} />
+              </div>
+              <h3 className="font-black text-slate-900 text-base leading-snug">
+                {confirmDialog.title}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {confirmDialog.message}
+            </p>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmDialog.onConfirm}
+                className={`px-5 py-2.5 rounded-xl text-xs font-black text-white shadow-md transition-all active:scale-95 ${
+                  confirmDialog.confirmVariant === 'danger'
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-indigo-600 hover:bg-indigo-700'
+                }`}
+              >
+                {confirmDialog.confirmLabel || 'Confirmar'}
+              </button>
+            </div>
           </div>
         </div>
       )}
