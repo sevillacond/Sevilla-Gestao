@@ -1,4 +1,7 @@
 import { UnitId, UnitDetails, Transaction, TransactionType, LegalObligation, CondoDocument } from './types';
+import { SEVILLA_LOGO_PATH, SEVILLA_LOGO_BASE64 } from './logoData';
+
+export { SEVILLA_LOGO_PATH, SEVILLA_LOGO_BASE64 };
 
 export const UNITS: UnitId[] = [
   '101', '102', '103', '104',
@@ -8,6 +11,8 @@ export const UNITS: UnitId[] = [
 
 export const CONDO_INFO = {
   name: 'Condomínio Residencial Sevilla',
+  logoPath: SEVILLA_LOGO_PATH,
+  logoBase64: SEVILLA_LOGO_BASE64,
   email: 'sevillacond@gmail.com',
   portalUrl: 'https://sevilla-silk.vercel.app',
   cnpj: '34.821.904/0001-52',

@@ -359,8 +359,12 @@ Após o aceite, emitiremos o Termo de Acordo Formal com valor de título executi
       {/* Banner Superior & Ações Rápidas */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 sm:p-7 rounded-3xl text-white border border-indigo-900/50 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div className="flex items-start sm:items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-            <Calculator size={26} />
+          <div className="w-14 h-14 rounded-2xl bg-white p-1 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-lg overflow-hidden">
+            <img 
+              src={CONDO_INFO.logoPath} 
+              alt="Logo Condomínio Residencial Sevilla" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">

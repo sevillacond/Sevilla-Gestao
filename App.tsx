@@ -84,6 +84,25 @@ const App: React.FC = () => {
     }
   }, [toast]);
 
+  // Fechar menu mobile com tecla ESC e bloquear scroll do fundo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
   // Fechar menu mobile ao trocar de aba
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
@@ -291,126 +310,105 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* TOP HEADER MOBILE (Aparece apenas em telas < md) */}
-      <div className="md:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-lg">
-        <div className="p-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-xl flex items-center justify-center text-white shadow-md">
-              <Building2 size={20} />
-            </div>
-            <div>
-              <h1 className="text-white font-black text-sm tracking-tight leading-tight">
-                Residencial Sevilla
-              </h1>
-              <p className="text-[9px] text-indigo-400 uppercase tracking-wider font-extrabold">
-                12 Unidades • Síndico Tech
-              </p>
-            </div>
-          </div>
+      {/* BACKDROP DO SIDEBAR MOBILE (quando drawer estiver aberto) */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 md:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
+      )}
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsAdding(true)}
-              className="p-2 bg-indigo-600 text-white rounded-xl shadow-md active:scale-95"
-              title="Novo Lançamento"
-            >
-              <PlusCircle size={17} />
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-colors"
-              title="Abrir Menu"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+      {/* TOP HEADER MOBILE (Barra superior compacta com botão para abrir/fechar o sidebar) */}
+      <header className="md:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-lg px-3.5 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            className="p-2 -ml-1 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-xl transition-all flex items-center justify-center shrink-0"
+            aria-label={mobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+            title="Menu de Navegação"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="w-9 h-9 bg-white rounded-xl p-0.5 shadow-md shrink-0 flex items-center justify-center overflow-hidden border border-slate-700/50">
+            <img 
+              src={CONDO_INFO.logoPath} 
+              alt="Logo Condomínio Residencial Sevilla" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-white font-black text-xs sm:text-sm tracking-tight leading-tight truncate">
+              Residencial Sevilla
+            </h1>
+            <p className="text-[9px] text-indigo-400 uppercase tracking-wider font-extrabold truncate">
+              12 Unidades • Síndico Tech
+            </p>
           </div>
         </div>
 
-        {/* Barra de Navegação Horizontal com Pílulas Deslizáveis no Mobile */}
-        <div className="flex overflow-x-auto scrollbar-none px-3 py-2 gap-1.5 border-t border-slate-800/80 bg-slate-950/70">
-          {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabChange(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
-                  isActive 
-                    ? 'bg-indigo-600 text-white shadow-md' 
-                    : 'bg-slate-800/60 text-slate-400 hover:text-white'
-                }`}
-              >
-                <Icon size={14} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => handleTabChange('simulation')}
+            className={`p-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+              activeTab === 'simulation' 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-slate-800 text-slate-300 hover:text-white'
+            }`}
+            title="Simulador de Atrasos"
+          >
+            <Calculator size={16} />
+          </button>
+          <button
+            onClick={() => setIsAdding(true)}
+            className="p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md active:scale-95"
+            title="Novo Lançamento"
+          >
+            <PlusCircle size={16} />
+          </button>
         </div>
+      </header>
 
-        {/* Drawer Mobile Expandido quando Hamburger é ativado */}
-        {mobileMenuOpen && (
-          <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-3 animate-in slide-in-from-top-4 duration-200">
-            <div className="space-y-1">
-              {navItems.map(item => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleTabChange(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      isActive 
-                        ? 'bg-indigo-600 text-white' 
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon size={16} />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+      {/* SIDEBAR RESPONSIVO (Off-canvas em Mobile com slide-in, Fixo na lateral no Desktop) */}
+      <aside 
+        className={`
+          fixed md:sticky top-0 left-0 h-screen w-72 sm:w-80 md:w-72 bg-slate-900 text-slate-300 flex flex-col z-50 shadow-2xl shrink-0 transition-transform duration-300 ease-in-out
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
+        {/* Cabeçalho do Sidebar com botão de fechar no Mobile */}
+        <div className="p-5 sm:p-6 border-b border-slate-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-white rounded-2xl p-0.5 shadow-lg shadow-indigo-600/20 shrink-0 flex items-center justify-center overflow-hidden border border-slate-700/60">
+                <img 
+                  src={CONDO_INFO.logoPath} 
+                  alt="Logo Condomínio Residencial Sevilla" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-white font-black leading-tight text-sm sm:text-base tracking-tight truncate">
+                  Residencial Sevilla
+                </h1>
+                <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-extrabold mt-0.5 truncate">
+                  12 Unidades • 101 a 304
+                </p>
+              </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-              <span className="truncate">Pix: <strong className="text-slate-200">{CONDO_INFO.email}</strong></span>
-              <button
-                onClick={handleResetData}
-                className="text-indigo-400 hover:underline flex items-center gap-1 text-[11px] font-bold shrink-0"
-              >
-                <RefreshCcw size={12} />
-                Resetar Base
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sidebar Lateral Desktop (hidden em telas < md) */}
-      <aside className="hidden md:flex md:w-72 bg-slate-900 text-slate-300 flex-col sticky top-0 h-screen z-20 shadow-2xl shrink-0">
-        <div className="p-6 border-b border-slate-800">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/30">
-              <Building2 size={24} />
-            </div>
-            <div>
-              <h1 className="text-white font-black leading-tight text-base tracking-tight">
-                Residencial Sevilla
-              </h1>
-              <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-extrabold mt-0.5">
-                12 Unidades • Síndico Tech
-              </p>
-            </div>
+            {/* Botão de Fechar Exclusivo para Mobile */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+              aria-label="Fechar menu"
+              title="Fechar menu lateral"
+            >
+              <X size={20} />
+            </button>
           </div>
           
-          <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2 text-[11px] text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-1.5 text-[11px] text-slate-400">
             <div className="flex items-center justify-between">
               <span className="truncate">Pix: <strong className="text-slate-300">{CONDO_INFO.email}</strong></span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Auditoria Ativa"></span>
@@ -428,10 +426,15 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Navegação Desktop */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-          <div className="px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-            Gestão & Auditoria
+        {/* Lista de Módulos & Navegação */}
+        <nav className="flex-1 p-3.5 sm:p-4 space-y-1 overflow-y-auto">
+          <div className="flex items-center justify-between px-3 py-1.5">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Navegação do Síndico
+            </span>
+            <span className="text-[10px] font-bold text-slate-600 md:hidden">
+              Toque para abrir
+            </span>
           </div>
 
           {navItems.map(item => {
@@ -441,18 +444,22 @@ const App: React.FC = () => {
               <button 
                 key={item.id}
                 onClick={() => handleTabChange(item.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 sm:py-3 rounded-2xl transition-all ${
                   isActive 
                     ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
                     : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon size={18} />
-                  <span className="text-xs">{item.label}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Icon size={18} className="shrink-0" />
+                  <span className="text-xs truncate">{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-black">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
+                    isActive 
+                      ? 'bg-indigo-800/80 text-white' 
+                      : 'bg-slate-800 text-slate-300'
+                  }`}>
                     {item.badge}
                   </span>
                 )}
@@ -460,14 +467,28 @@ const App: React.FC = () => {
             );
           })}
 
-          <div className="pt-4 mt-4 border-t border-slate-800">
-            <div className="px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-              Controles do Sistema
+          <div className="pt-3 mt-3 border-t border-slate-800">
+            <div className="px-3 py-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Ações Rápidas
             </div>
 
             <button 
-              onClick={handleResetData}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/40 text-xs font-semibold transition-all group"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setIsAdding(true);
+              }}
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 text-xs font-semibold transition-all mb-1"
+            >
+              <PlusCircle size={16} className="shrink-0" />
+              <span>Novo Lançamento</span>
+            </button>
+
+            <button 
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleResetData();
+              }}
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/40 text-xs font-semibold transition-all group"
             >
               <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-500 shrink-0" />
               <span>Recarregar Base Auditada</span>
@@ -475,8 +496,8 @@ const App: React.FC = () => {
           </div>
         </nav>
 
-        {/* Identificação do Síndico */}
-        <div className="p-4 m-3 rounded-2xl bg-slate-800/60 border border-slate-800 text-[11px]">
+        {/* Rodapé do Sidebar: Identificação do Síndico */}
+        <div className="p-3.5 m-3 rounded-2xl bg-slate-800/60 border border-slate-800 text-[11px] shrink-0">
           <p className="text-[9px] uppercase font-black text-indigo-400 tracking-wider">Síndico Responsável</p>
           <p className="font-bold text-white mt-0.5 truncate">{state.sindico.name}</p>
           <p className="text-slate-400 text-[10px] truncate">{state.sindico.role}</p>

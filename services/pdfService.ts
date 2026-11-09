@@ -40,19 +40,32 @@ export const generateFinancialReport = (
   doc.setFillColor(30, 41, 59); // slate-900
   doc.rect(0, 0, 210, 32, 'F');
 
-  doc.setFontSize(16);
+  // Logotipo oficial do Residencial Sevilla
+  try {
+    if (CONDO_INFO.logoBase64) {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(14, 4, 24, 24, 2, 2, 'F');
+      doc.addImage(CONDO_INFO.logoBase64, 'JPEG', 15, 5, 22, 22);
+    }
+  } catch (err) {
+    console.warn('Erro ao carregar logotipo no balancete', err);
+  }
+
+  const headerTextX = CONDO_INFO.logoBase64 ? 43 : 14;
+
+  doc.setFontSize(15);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 14, 14);
+  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', headerTextX, 13);
 
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(203, 213, 225); // slate-300
-  doc.text(`12 Unidades (101 a 304) | CNPJ: ${CONDO_INFO.cnpj} | ${CONDO_INFO.email} | https://sevilla-silk.vercel.app`, 14, 21);
-  doc.text(`Gestão do Síndico-Programador • Emissão: ${dateStr} • Referência: ${monthName.toUpperCase()}`, 14, 27);
+  doc.text(`12 Unidades (101 a 304) | CNPJ: ${CONDO_INFO.cnpj} | ${CONDO_INFO.email}`, headerTextX, 19.5);
+  doc.text(`Portal: https://sevilla-silk.vercel.app | Emissão: ${dateStr} • Ref: ${monthName.toUpperCase()}`, headerTextX, 25.5);
 
   // Título do Documento
-  doc.setFontSize(13);
+  doc.setFontSize(12.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
   doc.text(reportTitle.toUpperCase(), 14, 42);
@@ -188,23 +201,37 @@ export const generateAuditDocumentPDF = (title: string, content: string) => {
 
   // Cabeçalho
   doc.setFillColor(15, 23, 42); // slate-900
-  doc.rect(0, 0, 210, 28, 'F');
+  doc.rect(0, 0, 210, 30, 'F');
 
-  doc.setFontSize(15);
+  // Logotipo oficial do Residencial Sevilla
+  try {
+    if (CONDO_INFO.logoBase64) {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(14, 4, 22, 22, 2, 2, 'F');
+      doc.addImage(CONDO_INFO.logoBase64, 'JPEG', 15, 5, 20, 20);
+    }
+  } catch (err) {
+    console.warn('Erro ao carregar logotipo no laudo', err);
+  }
+
+  const auditHeaderX = CONDO_INFO.logoBase64 ? 41 : 14;
+
+  doc.setFontSize(14.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 14, 13);
+  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', auditHeaderX, 13);
 
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(148, 163, 184);
-  doc.text(`12 Unidades (101 a 304) | Documentação Oficial de Auditoria | ${dateStr}`, 14, 20);
+  doc.text(`12 Unidades (101 a 304) | Documentação Oficial de Auditoria | ${dateStr}`, auditHeaderX, 19.5);
+  doc.text(`CNPJ: ${CONDO_INFO.cnpj} | Portal: https://sevilla-silk.vercel.app`, auditHeaderX, 25);
 
   // Título
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
-  doc.text(title, 14, 38);
+  doc.text(title, 14, 40);
 
   // Corpo de texto com quebra automática
   doc.setFontSize(9.5);
@@ -261,33 +288,25 @@ export const generateLateFeeSimulationPDF = (
   const drawTopHeader = () => {
     // Barra superior azul marinho
     doc.setFillColor(21, 46, 100);
-    doc.rect(0, 0, 210, 23, 'F');
+    doc.rect(0, 0, 210, 24, 'F');
 
-    // Emblema estilizado Sevilla no canto superior esquerdo
+    // Emblema com o logotipo oficial do Sevilla
     doc.setFillColor(255, 255, 255);
-    doc.roundedRect(14, 3, 24, 17, 2, 2, 'F');
+    doc.roundedRect(14, 2.5, 20, 19, 1.5, 1.5, 'F');
 
-    // Desenho do sol/arcos dourados
-    doc.setFillColor(245, 158, 11); // amber-500
-    doc.circle(26, 7.5, 3, 'F');
-    doc.setDrawColor(245, 158, 11);
-    doc.setLineWidth(0.6);
-    doc.line(22, 10, 30, 10);
-
-    // Texto Sevilla no logo
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
-    doc.setTextColor(21, 46, 100);
-    doc.text('Sevilla', 26, 14, { align: 'center' });
-    doc.setFontSize(3.2);
-    doc.setFont('helvetica', 'normal');
-    doc.text('CONDOMÍNIO RESIDENCIAL', 26, 17.5, { align: 'center' });
+    try {
+      if (CONDO_INFO.logoBase64) {
+        doc.addImage(CONDO_INFO.logoBase64, 'JPEG', 14.5, 3, 19, 18);
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar logotipo no demonstrativo', err);
+    }
 
     // Nome oficial do Condomínio
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(255, 255, 255);
-    doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 42, 14);
+    doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 38, 14);
 
     // Lado direito: DEMONSTRATIVO & Data de Emissão
     doc.setFontSize(10.5);
@@ -590,16 +609,29 @@ export const generateDebtAgreementPDF = (
   doc.setFillColor(21, 46, 100);
   doc.rect(0, 0, 210, 32, 'F');
 
+  // Logotipo oficial do Residencial Sevilla
+  try {
+    if (CONDO_INFO.logoBase64) {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(14, 4, 24, 24, 2, 2, 'F');
+      doc.addImage(CONDO_INFO.logoBase64, 'JPEG', 15, 5, 22, 22);
+    }
+  } catch (err) {
+    console.warn('Erro ao carregar logotipo no termo de acordo', err);
+  }
+
+  const agreeHeaderX = CONDO_INFO.logoBase64 ? 43 : 14;
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(255, 255, 255);
-  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 14, 13);
+  doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', agreeHeaderX, 13);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(219, 234, 254);
-  doc.text(`CNPJ: ${CONDO_INFO.cnpj} • 12 Unidades (101 a 304) • ${CONDO_INFO.email}`, 14, 20);
-  doc.text(`Portal: https://sevilla-silk.vercel.app • Síndico Responsável: ${params.sindicoName || CONDO_INFO.sindico.name}`, 14, 26);
+  doc.text(`CNPJ: ${CONDO_INFO.cnpj} • 12 Unidades (101 a 304) • ${CONDO_INFO.email}`, agreeHeaderX, 20);
+  doc.text(`Portal: https://sevilla-silk.vercel.app • Síndico: ${params.sindicoName || CONDO_INFO.sindico.name}`, agreeHeaderX, 26);
 
   // Título do Instrumento
   doc.setFont('helvetica', 'bold');
