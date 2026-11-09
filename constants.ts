@@ -9,6 +9,7 @@ export const UNITS: UnitId[] = [
 export const CONDO_INFO = {
   name: 'Condomínio Residencial Sevilla',
   email: 'sevillacond@gmail.com',
+  portalUrl: 'https://sevilla-silk.vercel.app',
   cnpj: '34.821.904/0001-52',
   address: 'Rua das Camélias, 240 - Bairro Jardim América, São Paulo - SP, CEP 01416-000',
   monthlyFee: 420.00, // R$ 380,00 Ordinária + R$ 40,00 Fundo de Reserva
@@ -435,6 +436,7 @@ export const generateSeedData = (): Transaction[] => {
 export const INITIAL_CONDO_STATE = {
   condoName: CONDO_INFO.name,
   condoEmail: CONDO_INFO.email,
+  portalUrl: CONDO_INFO.portalUrl,
   cnpj: CONDO_INFO.cnpj,
   address: CONDO_INFO.address,
   monthlyFee: CONDO_INFO.monthlyFee,

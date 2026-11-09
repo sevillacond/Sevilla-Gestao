@@ -140,6 +140,12 @@ npm run lint
 npm run build
 ```
 
+### ⚡ Deploy no Vercel (1-Click ou CLI)
+O projeto inclui `vercel.json` pré-configurado com regras de reescrita para Single Page Application (SPA) e cabeçalhos de segurança HTTP.
+1. Para deploy via Git: Conecte o repositório em [vercel.com/new](https://vercel.com/new) e clique em **Deploy**.
+2. Para deploy via terminal: Execute `npx vercel` ou `npx vercel --prod`.
+*Para instruções completas, consulte [`docs/DEPLOY_VERCEL.md`](docs/DEPLOY_VERCEL.md).*
+
 ---
 
 ## 🔒 8. Privacidade & LGPD Condominial

@@ -65,6 +65,7 @@ export interface CondoState {
   condoEmail: string;
   cnpj: string;
   address: string;
+  portalUrl?: string;
   monthlyFee: number;
   reserveFundPercentage: number; // 10%
   bankOrdinaryBalance: number;

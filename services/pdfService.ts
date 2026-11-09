@@ -21,10 +21,10 @@ export const generateFinancialReport = (
   doc.setTextColor(255, 255, 255);
   doc.text('CONDOMÍNIO RESIDENCIAL SEVILLA', 14, 14);
 
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(203, 213, 225); // slate-300
-  doc.text(`12 Unidades Autônomas (101 a 304) | CNPJ: ${CONDO_INFO.cnpj} | ${CONDO_INFO.email}`, 14, 21);
+  doc.text(`12 Unidades (101 a 304) | CNPJ: ${CONDO_INFO.cnpj} | ${CONDO_INFO.email} | https://sevilla-silk.vercel.app`, 14, 21);
   doc.text(`Gestão do Síndico-Programador • Emissão: ${dateStr} • Referência: ${monthName.toUpperCase()}`, 14, 27);
 
   // Título do Documento

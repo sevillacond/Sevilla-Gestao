@@ -4,7 +4,7 @@ import {
   ShieldCheck, Sparkles, PlusCircle, RefreshCcw, Trash2, 
   CheckCircle2, Info, Filter, Calendar, Search, XCircle,
   Building2, Coins, ArrowUpRight, Download, CreditCard, ChevronRight,
-  Menu, X
+  Menu, X, Globe
 } from 'lucide-react';
 import { 
   Transaction, TransactionType, CondoState, UnitId, 
@@ -379,9 +379,21 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span className="truncate">Pix: <strong className="text-slate-300">{CONDO_INFO.email}</strong></span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Auditoria Ativa"></span>
+          <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2 text-[11px] text-slate-400">
+            <div className="flex items-center justify-between">
+              <span className="truncate">Pix: <strong className="text-slate-300">{CONDO_INFO.email}</strong></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Auditoria Ativa"></span>
+            </div>
+            <a 
+              href={CONDO_INFO.portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors font-semibold"
+            >
+              <Globe size={12} />
+              <span className="truncate">sevilla-silk.vercel.app</span>
+              <ArrowUpRight size={11} className="opacity-70" />
+            </a>
           </div>
         </div>
 
