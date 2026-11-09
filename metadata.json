@@ -1,0 +1,8 @@
+{
+  "name": "CondoTech Sevilla - Gestão & Auditoria do Síndico",
+  "description": "Sistema integrado de gestão financeira, auditoria contábil e documentação predial para o Condomínio Residencial Sevilla (12 unidades: 101 a 304). Desenvolvido por Síndico-Programador Sênior com compliance e transparência.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
