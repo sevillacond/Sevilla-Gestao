@@ -17,11 +17,21 @@ try {
   // Ignorar caso já esteja registrado
 }
 
+// Polyfill defensivo: caso o protótipo não tenha sido estendido no ambiente Vite/Rollup
+if (typeof jsPDF !== 'undefined' && jsPDF.prototype && !(jsPDF.prototype as any).autoTable) {
+  (jsPDF.prototype as any).autoTable = function(options: any) {
+    return autoTable(this, options);
+  };
+}
+
 export const generateFinancialReport = (
   transactions: Transaction[], 
   reportTitle: string = 'Balancete de Prestação de Contas'
 ) => {
   const doc = new jsPDF();
+  if (!(doc as any).autoTable) {
+    (doc as any).autoTable = (options: any) => autoTable(doc, options);
+  }
   const dateStr = new Date().toLocaleDateString('pt-BR');
   const now = new Date();
   const monthName = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
@@ -222,6 +232,9 @@ export const generateLateFeeSimulationPDF = (
   items: MonthSimulationItem[]
 ) => {
   const doc = new jsPDF();
+  if (!(doc as any).autoTable) {
+    (doc as any).autoTable = (options: any) => autoTable(doc, options);
+  }
   const selectedItems = items.filter(it => it.selected);
 
   // Totais
@@ -564,6 +577,9 @@ export const generateDebtAgreementPDF = (
   agreement: DebtAgreementParams
 ) => {
   const doc = new jsPDF();
+  if (!(doc as any).autoTable) {
+    (doc as any).autoTable = (options: any) => autoTable(doc, options);
+  }
   const dateStr = new Date().toLocaleDateString('pt-BR');
   const [calcY, calcM, calcD] = params.calculationDate.split('-');
   const formattedCalcDate = `${calcD}/${calcM}/${calcY}`;
