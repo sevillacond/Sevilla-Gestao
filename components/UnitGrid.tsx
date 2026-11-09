@@ -47,20 +47,20 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
   return (
     <div className="space-y-6">
       {/* Barra de Status Sintético da Edificação */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-            <span className="text-xs font-bold text-slate-700">Quitados: {paidCount} / 12</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></span>
+            <span className="text-xs font-bold text-slate-700">Quitados: {paidCount}/12</span>
           </div>
-          <span className="text-slate-300">•</span>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-            <span className="text-xs font-bold text-slate-700">Pendentes: {pendingCount} / 12</span>
+          <span className="text-slate-300 hidden sm:inline">•</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-500"></span>
+            <span className="text-xs font-bold text-slate-700">Pendentes: {pendingCount}/12</span>
           </div>
         </div>
         <div className="text-[11px] font-semibold text-slate-500">
-          Cota Ordinária: R$ 380,00 + Fundo Reserva: R$ 40,00 = <strong className="text-slate-800">R$ {monthlyFee.toFixed(2)}</strong>/mês
+          Cota Ordinária: R$ 380,00 + F.R.: R$ 40,00 = <strong className="text-slate-800">R$ {monthlyFee.toFixed(2)}</strong>/mês
         </div>
       </div>
 
@@ -68,8 +68,8 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
       <div className="space-y-6">
         {floors.map(floor => (
           <div key={floor.name} className="space-y-2.5">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
                 {floor.name}
               </span>
               <span className="text-[10px] font-bold text-slate-400">
@@ -77,7 +77,7 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
               {floor.units.map(unitId => {
                 const paid = isPaid(unitId);
                 const info = unitsData[unitId] || DEFAULT_UNITS_DATA[unitId];
@@ -87,7 +87,7 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
                   <div 
                     key={unitId}
                     onClick={() => setSelectedUnit(info)}
-                    className={`p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
+                    className={`p-3.5 sm:p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
                       paid 
                         ? 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-400 hover:shadow-md' 
                         : isOverdueMulti
@@ -96,9 +96,9 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
                     }`}
                   >
                     <div>
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm ${
+                      <div className="flex items-start justify-between mb-2.5 sm:mb-3">
+                        <div className="flex items-center gap-2 sm:gap-2.5">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm shadow-sm shrink-0 ${
                             paid 
                               ? 'bg-emerald-600 text-white' 
                               : isOverdueMulti
@@ -107,42 +107,42 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
                           }`}>
                             {unitId}
                           </div>
-                          <div>
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block leading-tight">
+                          <div className="min-w-0">
+                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-400 block leading-tight">
                               Apto {unitId}
                             </span>
-                            <span className="text-xs font-bold text-slate-800 line-clamp-1">
+                            <span className="text-[11px] sm:text-xs font-bold text-slate-800 truncate block">
                               {info?.residentName.split(' ')[0]} {info?.residentName.split(' ')[1] || ''}
                             </span>
                           </div>
                         </div>
 
-                        <div className="p-1 rounded-lg bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="p-1 rounded-lg bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
                           <ArrowUpRight size={14} className="text-slate-600" />
                         </div>
                       </div>
 
-                      <div className="space-y-1 mb-4 text-[11px] text-slate-500">
+                      <div className="space-y-1 mb-3 text-[10px] sm:text-[11px] text-slate-500">
                         <div className="flex items-center gap-1.5">
-                          <Car size={12} className="text-slate-400 shrink-0" />
-                          <span className="truncate">{info?.parkingSpot}</span>
+                          <Car size={11} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{info?.parkingSpot.split(' ')[0]} {info?.parkingSpot.split(' ')[1]}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
-                      <span className={`text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider ${
+                    <div className="pt-2.5 border-t border-slate-200/60 flex items-center justify-between">
+                      <span className={`text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-black uppercase tracking-wider ${
                         paid 
                           ? 'bg-emerald-100 text-emerald-800' 
                           : isOverdueMulti
                             ? 'bg-rose-100 text-rose-800'
                             : 'bg-amber-100 text-amber-800'
                       }`}>
-                        {paid ? 'Quitado' : (isOverdueMulti ? '2 Meses Pend.' : 'Aguardando')}
+                        {paid ? 'Quitado' : (isOverdueMulti ? 'Atrasado' : 'Aguardando')}
                       </span>
 
-                      <span className="text-xs font-extrabold text-slate-700">
-                        R$ {monthlyFee.toFixed(2)}
+                      <span className="text-[11px] sm:text-xs font-black text-slate-700">
+                        R$ {monthlyFee.toFixed(0)}
                       </span>
                     </div>
                   </div>

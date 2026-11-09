@@ -4,7 +4,6 @@ import {
   FileCheck2, Building2, Wrench, Calendar, Plus, RefreshCw, Cpu
 } from 'lucide-react';
 import { LegalObligation, Transaction, TransactionType } from '../types';
-import { CONDO_INFO, UNITS } from '../constants';
 
 interface AuditInspectionPanelProps {
   obligations: LegalObligation[];
@@ -21,15 +20,7 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [newDate, setNewDate] = useState('');
 
-  // Checagens automáticas de integridade de dados contábeis (Auditoria do Síndico-Engenheiro)
-  const totalRevenues = transactions
-    .filter(t => t.type === TransactionType.REVENUE)
-    .reduce((s, t) => s + t.amount, 0);
-
-  const totalExpenses = transactions
-    .filter(t => t.type === TransactionType.EXPENSE)
-    .reduce((s, t) => s + t.amount, 0);
-
+  // Checagens automáticas de integridade de dados contábeis
   const reserveFundRevenues = transactions
     .filter(t => t.category.includes('Reserva') || t.account === 'FUNDO_RESERVA')
     .reduce((s, t) => s + t.amount, 0);
@@ -85,7 +76,6 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
     e.preventDefault();
     if (!selectedObligation || !newDate) return;
     
-    // Adiciona 1 ano ou 6 meses conforme a periodicidade
     const updated: LegalObligation = {
       ...selectedObligation,
       lastInspectionDate: new Date().toISOString().split('T')[0],
@@ -101,17 +91,17 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       
       {/* Bloco 1: Auditoria de Integridade de Dados Contábeis */}
-      <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+      <div className="bg-white p-5 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-              <Cpu size={24} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+              <Cpu size={22} className="sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h3 className="font-black text-slate-900 tracking-tight text-lg">
+              <h3 className="font-black text-slate-900 tracking-tight text-base sm:text-lg">
                 Auditoria de Dados & Integridade Algorítmica
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -119,12 +109,12 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
               </p>
             </div>
           </div>
-          <span className="px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
-            5/5 Verificações Aprovadas
+          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+            5/5 Verificações Conformes
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {auditChecks.map((check, i) => (
             <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
               <div>
@@ -152,31 +142,32 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
 
       {/* Bloco 2: Painel de Obrigações Legais & Laudos Técnicos Prediais */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-black text-slate-900 tracking-tight text-lg">
+            <h3 className="font-black text-slate-900 tracking-tight text-base sm:text-lg">
               Laudos Técnicos, Seguro Obrigatório & Normas Prediais
             </h3>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Manutenção das obrigações compulsórias do Condomínio Residencial Sevilla (AVCB, Seguro, Elevadores, Água).
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Manutenção das obrigações compulsórias do Residencial Sevilla (AVCB, Seguro, Elevadores, Água).
             </p>
           </div>
-          <span className="text-xs text-slate-400 font-semibold">
+          <span className="text-xs text-slate-400 font-semibold self-start sm:self-auto">
             {obligations.length} Laudos Mapeados
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Visualização em Tabela para Tablets e Desktops */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50 text-[10px] uppercase font-black text-slate-500 border-b border-slate-100">
-                <th className="px-8 py-4">Obrigação / Laudo</th>
-                <th className="px-8 py-4">Categoria</th>
-                <th className="px-8 py-4">Empresa / Responsável</th>
-                <th className="px-8 py-4">Última Vistoria</th>
-                <th className="px-8 py-4">Próximo Vencimento</th>
-                <th className="px-8 py-4 text-center">Status</th>
-                <th className="px-8 py-4 text-right">Ações</th>
+                <th className="px-6 py-4">Obrigação / Laudo</th>
+                <th className="px-6 py-4">Categoria</th>
+                <th className="px-6 py-4">Empresa / Responsável</th>
+                <th className="px-6 py-4">Última Vistoria</th>
+                <th className="px-6 py-4">Próximo Vencimento</th>
+                <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-6 py-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -184,27 +175,27 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
                 const isUrgent = obl.status === 'A_VENCER' || obl.status === 'VENCIDO';
                 return (
                   <tr key={obl.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-8 py-4">
+                    <td className="px-6 py-4">
                       <p className="font-bold text-slate-900">{obl.name}</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">{obl.documentNumber} • {obl.periodicity}</p>
                     </td>
-                    <td className="px-8 py-4">
+                    <td className="px-6 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-[10px] font-bold">
                         {obl.category}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-slate-600 font-medium">
+                    <td className="px-6 py-4 text-slate-600 font-medium">
                       {obl.responsibleCompany}
                     </td>
-                    <td className="px-8 py-4 text-slate-500">
+                    <td className="px-6 py-4 text-slate-500">
                       {new Date(obl.lastInspectionDate).toLocaleDateString('pt-BR')}
                     </td>
-                    <td className="px-8 py-4">
+                    <td className="px-6 py-4">
                       <span className={`font-bold ${isUrgent ? 'text-amber-600' : 'text-slate-700'}`}>
                         {new Date(obl.nextDueDate).toLocaleDateString('pt-BR')}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-center">
+                    <td className="px-6 py-4 text-center">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                         obl.status === 'VIGENTE' 
                           ? 'bg-emerald-100 text-emerald-800' 
@@ -215,7 +206,7 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
                         {obl.status === 'VIGENTE' ? 'Vigente' : (obl.status === 'A_VENCER' ? 'A Vencer' : 'Vencido')}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-right">
+                    <td className="px-6 py-4 text-right">
                       <button 
                         onClick={() => handleRenewObligation(obl)}
                         className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-bold transition-colors inline-flex items-center gap-1"
@@ -230,12 +221,63 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
             </tbody>
           </table>
         </div>
+
+        {/* Visualização em Cards Nativos para Smartphones */}
+        <div className="md:hidden divide-y divide-slate-100 p-3 space-y-3">
+          {obligations.map(obl => {
+            const isUrgent = obl.status === 'A_VENCER' || obl.status === 'VENCIDO';
+            return (
+              <div key={obl.id} className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-[9px] font-black uppercase text-indigo-600 tracking-wider bg-indigo-50 px-2 py-0.5 rounded">
+                      {obl.category}
+                    </span>
+                    <h5 className="font-bold text-slate-900 text-xs mt-1 leading-snug">
+                      {obl.name}
+                    </h5>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 ${
+                    obl.status === 'VIGENTE' 
+                      ? 'bg-emerald-100 text-emerald-800' 
+                      : obl.status === 'A_VENCER'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-rose-100 text-rose-800'
+                  }`}>
+                    {obl.status === 'VIGENTE' ? 'Vigente' : (obl.status === 'A_VENCER' ? 'A Vencer' : 'Vencido')}
+                  </span>
+                </div>
+
+                <div className="text-[11px] text-slate-500 space-y-1">
+                  <p><strong>Empresa:</strong> {obl.responsibleCompany}</p>
+                  <p><strong>Doc:</strong> {obl.documentNumber} ({obl.periodicity})</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <span>Última: {new Date(obl.lastInspectionDate).toLocaleDateString('pt-BR')}</span>
+                    <span className={`font-bold ${isUrgent ? 'text-amber-600' : 'text-slate-700'}`}>
+                      Vence: {new Date(obl.nextDueDate).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/80 flex justify-end">
+                  <button 
+                    onClick={() => handleRenewObligation(obl)}
+                    className="w-full py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw size={13} />
+                    Registrar Renovação
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Modal de Renovação de Laudo */}
       {isEditing && selectedObligation && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-5">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div>
               <span className="text-[10px] font-black uppercase text-indigo-600 tracking-wider">
                 Atualização de Conformidade
@@ -243,7 +285,7 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
               <h3 className="text-base font-black text-slate-900 mt-1">
                 {selectedObligation.name}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Insira a nova data de vencimento da vistoria ou apólice renovada.
               </p>
             </div>
@@ -262,17 +304,17 @@ export const AuditInspectionPanel: React.FC<AuditInspectionPanelProps> = ({
                 />
               </div>
 
-              <div className="pt-2 flex gap-3">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
                 <button 
                   type="button" 
                   onClick={() => setIsEditing(false)}
-                  className="flex-1 py-3 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl"
+                  className="w-full sm:flex-1 py-3 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-3 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md"
+                  className="w-full sm:flex-1 py-3 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md"
                 >
                   Confirmar Renovação
                 </button>

@@ -3,7 +3,8 @@ import {
   LayoutDashboard, Receipt, UserCheck, FileText, 
   ShieldCheck, Sparkles, PlusCircle, RefreshCcw, Trash2, 
   CheckCircle2, Info, Filter, Calendar, Search, XCircle,
-  Building2, Coins, ArrowUpRight, Download, CreditCard, ChevronRight
+  Building2, Coins, ArrowUpRight, Download, CreditCard, ChevronRight,
+  Menu, X
 } from 'lucide-react';
 import { 
   Transaction, TransactionType, CondoState, UnitId, 
@@ -16,7 +17,7 @@ import { AuditInspectionPanel } from './components/AuditInspectionPanel';
 import { DocumentationViewer } from './components/DocumentationViewer';
 import { 
   REVENUE_CATEGORIES, EXPENSE_CATEGORIES, UNITS, 
-  CONDO_INFO, INITIAL_CONDO_STATE, generateSeedData 
+  CONDO_INFO, INITIAL_CONDO_STATE 
 } from './constants';
 import { generateFinancialReport } from './services/pdfService';
 import { analyzeFinances } from './services/geminiService';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   });
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports'>('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
@@ -65,6 +67,12 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  // Fechar menu mobile ao trocar de aba
+  const handleTabChange = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
 
   // Estado do formulário de novo lançamento
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
@@ -113,8 +121,6 @@ const App: React.FC = () => {
       .reduce((sum, t) => sum + t.amount, 0);
     return state.bankOrdinaryBalance + ordinaryRevenues - ordinaryExpenses;
   }, [state.transactions, state.bankOrdinaryBalance]);
-
-  const totalBalance = ordinaryCashBalance + reserveFundBalance;
 
   // Lógica de Registro de Nova Transação
   const handleAddTransaction = (e: React.FormEvent) => {
@@ -222,24 +228,142 @@ const App: React.FC = () => {
     }
   };
 
+  interface NavItem {
+    id: 'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports';
+    label: string;
+    icon: React.ComponentType<{ size?: number; className?: string }>;
+    badge?: string;
+  }
+
+  const navItems: NavItem[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'units', label: '12 Unidades', icon: UserCheck, badge: '101..304' },
+    { id: 'transactions', label: 'Lançamentos', icon: Receipt },
+    { id: 'audit', label: 'Auditoria & Laudos', icon: ShieldCheck, badge: '6 Laudos' },
+    { id: 'documents', label: 'Dossiê & Atas', icon: FileText },
+    { id: 'reports', label: 'Prestação (PDF)', icon: Coins }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 font-['Inter']">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-right duration-300">
-          <div className={`px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border ${
+        <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[100] animate-in slide-in-from-right duration-300 max-w-sm">
+          <div className={`px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 sm:gap-3 border ${
             toast.type === 'success' 
               ? 'bg-emerald-700 border-emerald-600 text-white' 
               : 'bg-slate-900 border-slate-700 text-white'
           }`}>
-            {toast.type === 'success' ? <CheckCircle2 size={18} /> : <Info size={18} />}
-            <span className="font-semibold text-xs">{toast.message}</span>
+            {toast.type === 'success' ? <CheckCircle2 size={18} className="shrink-0" /> : <Info size={18} className="shrink-0" />}
+            <span className="font-semibold text-xs leading-snug">{toast.message}</span>
           </div>
         </div>
       )}
 
-      {/* Sidebar Lateral */}
-      <aside className="w-full md:w-72 bg-slate-900 text-slate-300 flex flex-col sticky top-0 md:h-screen z-20 shadow-2xl shrink-0">
+      {/* TOP HEADER MOBILE (Aparece apenas em telas < md) */}
+      <div className="md:hidden sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-lg">
+        <div className="p-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-xl flex items-center justify-center text-white shadow-md">
+              <Building2 size={20} />
+            </div>
+            <div>
+              <h1 className="text-white font-black text-sm tracking-tight leading-tight">
+                Residencial Sevilla
+              </h1>
+              <p className="text-[9px] text-indigo-400 uppercase tracking-wider font-extrabold">
+                12 Unidades • Síndico Tech
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsAdding(true)}
+              className="p-2 bg-indigo-600 text-white rounded-xl shadow-md active:scale-95"
+              title="Novo Lançamento"
+            >
+              <PlusCircle size={17} />
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-colors"
+              title="Abrir Menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Barra de Navegação Horizontal com Pílulas Deslizáveis no Mobile */}
+        <div className="flex overflow-x-auto scrollbar-none px-3 py-2 gap-1.5 border-t border-slate-800/80 bg-slate-950/70">
+          {navItems.map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
+                  isActive 
+                    ? 'bg-indigo-600 text-white shadow-md' 
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon size={14} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Drawer Mobile Expandido quando Hamburger é ativado */}
+        {mobileMenuOpen && (
+          <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-3 animate-in slide-in-from-top-4 duration-200">
+            <div className="space-y-1">
+              {navItems.map(item => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleTabChange(item.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isActive 
+                        ? 'bg-indigo-600 text-white' 
+                        : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon size={16} />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <span className="truncate">Pix: <strong className="text-slate-200">{CONDO_INFO.email}</strong></span>
+              <button
+                onClick={handleResetData}
+                className="text-indigo-400 hover:underline flex items-center gap-1 text-[11px] font-bold shrink-0"
+              >
+                <RefreshCcw size={12} />
+                Resetar Base
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sidebar Lateral Desktop (hidden em telas < md) */}
+      <aside className="hidden md:flex md:w-72 bg-slate-900 text-slate-300 flex-col sticky top-0 h-screen z-20 shadow-2xl shrink-0">
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/30">
@@ -256,98 +380,42 @@ const App: React.FC = () => {
           </div>
           
           <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Pix: <strong className="text-slate-300">{CONDO_INFO.email}</strong></span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Auditoria Ativa"></span>
+            <span className="truncate">Pix: <strong className="text-slate-300">{CONDO_INFO.email}</strong></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Auditoria Ativa"></span>
           </div>
         </div>
 
-        {/* Navegação */}
+        {/* Navegação Desktop */}
         <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
           <div className="px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
             Gestão & Auditoria
           </div>
 
-          <button 
-            onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'dashboard' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <LayoutDashboard size={18} />
-            <span className="text-xs">Dashboard Executivo</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('units')}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'units' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <UserCheck size={18} />
-              <span className="text-xs">12 Unidades & Cobrança</span>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-black">
-              101..304
-            </span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('transactions')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'transactions' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <Receipt size={18} />
-            <span className="text-xs">Lançamentos & Caixa</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('audit')}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'audit' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <ShieldCheck size={18} />
-              <span className="text-xs">Auditoria & Laudos</span>
-            </div>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
-              6 Laudos
-            </span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('documents')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'documents' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <FileText size={18} />
-            <span className="text-xs">Dossiê, Regimento & Atas</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('reports')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-              activeTab === 'reports' 
-                ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
-                : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
-            }`}
-          >
-            <Coins size={18} />
-            <span className="text-xs">Prestação de Contas (PDF)</span>
-          </button>
+          {navItems.map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button 
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
+                  isActive 
+                    ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20' 
+                    : 'hover:bg-slate-800/80 text-slate-400 hover:text-white font-medium'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon size={18} />
+                  <span className="text-xs">{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-black">
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
 
           <div className="pt-4 mt-4 border-t border-slate-800">
             <div className="px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -358,7 +426,7 @@ const App: React.FC = () => {
               onClick={handleResetData}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/40 text-xs font-semibold transition-all group"
             >
-              <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
+              <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-500 shrink-0" />
               <span>Recarregar Base Auditada</span>
             </button>
           </div>
@@ -373,42 +441,42 @@ const App: React.FC = () => {
       </aside>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
+      <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8 pb-24 min-w-0">
         {/* Top Header */}
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between mb-5 sm:mb-6 gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-black uppercase">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 text-[9px] sm:text-[10px] font-black uppercase">
                 Edifício Residencial Sevilla
               </span>
-              <span className="text-xs text-slate-400">
-                12 Frações Ideais Iguais (8,333%)
+              <span className="text-[11px] sm:text-xs text-slate-400">
+                12 Frações (8,333%)
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">
               {activeTab === 'dashboard' && 'Painel Geral de Governança'}
               {activeTab === 'units' && 'Mapa das 12 Unidades & Cobrança'}
-              {activeTab === 'transactions' && 'Extrato & Conciliação de Lançamentos'}
-              {activeTab === 'audit' && 'Auditoria de Compliance & Inspeções Prediais'}
-              {activeTab === 'documents' && 'Dossiê do Condomínio, Regimento & Atas'}
-              {activeTab === 'reports' && 'Relatórios Oficiais & Balancete PDF'}
+              {activeTab === 'transactions' && 'Extrato & Conciliação'}
+              {activeTab === 'audit' && 'Auditoria & Compliance Predial'}
+              {activeTab === 'documents' && 'Dossiê, Regimento & Atas'}
+              {activeTab === 'reports' && 'Relatórios & Balancete PDF'}
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 sm:gap-3">
             <button 
               onClick={() => generateFinancialReport(state.transactions, 'Balancete Oficial de Prestação de Contas')}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs shadow-sm transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs shadow-sm transition-all active:scale-95"
             >
-              <Download size={16} />
+              <Download size={15} />
               <span>Exportar Balancete PDF</span>
             </button>
 
             <button 
               onClick={() => setIsAdding(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
             >
-              <PlusCircle size={16} />
+              <PlusCircle size={15} />
               <span>Novo Lançamento</span>
             </button>
           </div>
@@ -418,14 +486,14 @@ const App: React.FC = () => {
         <AuditAlertsBanner 
           transactions={state.transactions}
           obligations={state.legalObligations}
-          onNavigateToTab={setActiveTab}
+          onNavigateToTab={handleTabChange}
         />
 
         {/* ABA: DASHBOARD */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
             {/* 4 Cards de Resumo */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
               <SummaryCard 
                 title="Arrecadação Total" 
                 value={totalRevenues} 
@@ -461,25 +529,25 @@ const App: React.FC = () => {
             </div>
 
             {/* Grid 2 colunas: Mapa das 12 unidades & Consultor de IA */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
               
               {/* Coluna Esquerda: Visão Rápida dos 3 Pavimentos (101 a 304) */}
-              <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+              <div className="lg:col-span-7 bg-white p-4 sm:p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2 uppercase text-xs">
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-2 uppercase text-xs">
                       <UserCheck size={18} className="text-indigo-600" />
                       Status dos 3 Pavimentos (12 Unidades)
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Clique em qualquer unidade para ver dados do morador, multas e chave Pix.
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                      Toque em qualquer unidade para ficha, multas e chave Pix.
                     </p>
                   </div>
                   <button 
-                    onClick={() => setActiveTab('units')}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                    onClick={() => handleTabChange('units')}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5"
                   >
-                    Ver Detalhes <ChevronRight size={14} />
+                    Ver Tudo <ChevronRight size={14} />
                   </button>
                 </div>
 
@@ -492,7 +560,7 @@ const App: React.FC = () => {
               </div>
 
               {/* Coluna Direita: Parecer de IA do Síndico-Auditor */}
-              <div className="lg:col-span-5 bg-gradient-to-b from-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+              <div className="lg:col-span-5 bg-gradient-to-b from-slate-900 to-indigo-950 p-5 sm:p-8 rounded-3xl text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                 <div className="relative z-10 flex-1 flex flex-col">
@@ -505,32 +573,32 @@ const App: React.FC = () => {
                         Auditoria de Gestão com IA (Gemini)
                       </h3>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-indigo-500/20 border border-indigo-400/30 rounded-md text-indigo-300">
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-indigo-500/20 border border-indigo-400/30 rounded-md text-indigo-300">
                       Síndico Tech
                     </span>
                   </div>
 
                   {aiAnalysis ? (
-                    <div className="flex-1 overflow-y-auto max-h-96 pr-2 text-xs text-slate-300 leading-relaxed space-y-3 font-sans">
+                    <div className="flex-1 overflow-y-auto max-h-80 sm:max-h-96 pr-2 text-xs text-slate-300 leading-relaxed space-y-3 font-sans">
                       {aiAnalysis.split('\n\n').map((paragraph, idx) => (
                         <div key={idx} className="whitespace-pre-wrap">{paragraph}</div>
                       ))}
                     </div>
                   ) : (
-                    <div className="py-12 flex-1 flex flex-col items-center justify-center text-center">
-                      <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4">
-                        <Sparkles size={28} />
+                    <div className="py-8 sm:py-12 flex-1 flex flex-col items-center justify-center text-center">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3 sm:mb-4">
+                        <Sparkles size={26} />
                       </div>
                       <h4 className="font-bold text-sm text-white mb-1">
                         Auditoria Financeira Autônoma
                       </h4>
-                      <p className="text-xs text-slate-400 max-w-xs mb-6">
+                      <p className="text-xs text-slate-400 max-w-xs mb-5 sm:mb-6">
                         Gere parecer técnico especializado analisando os 12 apartamentos, maiores ofensores de custo e saúde do Fundo de Reserva.
                       </p>
                       <button 
                         disabled={isAnalyzing}
                         onClick={handleRunAnalysis}
-                        className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2 active:scale-95"
+                        className="w-full sm:w-auto px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
                       >
                         {isAnalyzing ? <RefreshCcw size={16} className="animate-spin" /> : <Sparkles size={16} />}
                         <span>Emitir Parecer do Síndico</span>
@@ -539,8 +607,8 @@ const App: React.FC = () => {
                   )}
 
                   {aiAnalysis && (
-                    <div className="pt-4 border-t border-slate-800 mt-4 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Modelo: Gemini 3.8 Flash • Auditado</span>
+                    <div className="pt-3.5 border-t border-slate-800 mt-4 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">Modelo: Gemini 3.8 Flash</span>
                       <button 
                         onClick={handleRunAnalysis}
                         disabled={isAnalyzing}
@@ -559,20 +627,20 @@ const App: React.FC = () => {
 
         {/* ABA: 12 UNIDADES & COBRANÇA */}
         {activeTab === 'units' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+            <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-slate-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
                     Controle de Frações & Adimplência das 12 Unidades
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Gestão individualizada dos apartamentos 101 a 304 com cálculo legal de juros/multa e chave Pix oficial.
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl">
-                    Chave Pix Oficial: <strong className="text-indigo-600">{CONDO_INFO.email}</strong>
+                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl truncate">
+                    Chave Pix: <strong className="text-indigo-600">{CONDO_INFO.email}</strong>
                   </span>
                 </div>
               </div>
@@ -591,27 +659,28 @@ const App: React.FC = () => {
         {activeTab === 'transactions' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-4 sm:p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">
-                    Livro Caixa & Movimentações Bancárias
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg uppercase tracking-tight">
+                    Livro Caixa & Movimentações
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
                     {state.transactions.length} registros auditados e vinculados a contas correntes.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div>
                   <button 
                     onClick={() => setIsAdding(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md transition-all"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md transition-all"
                   >
-                    <PlusCircle size={16} />
+                    <PlusCircle size={15} />
                     Adicionar Registro
                   </button>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Tabela para Telas Médias e Grandes */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50 text-[10px] uppercase font-black text-slate-500 border-b border-slate-100">
@@ -678,6 +747,54 @@ const App: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Cards Nativos para Smartphones (< md) */}
+              <div className="md:hidden divide-y divide-slate-100 p-3 space-y-3">
+                {state.transactions.map(t => (
+                  <div key={t.id} className="p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {new Date(t.date).toLocaleDateString('pt-BR')}
+                          </span>
+                          {t.unitId && (
+                            <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded text-[9px] font-black">
+                              Apto {t.unitId}
+                            </span>
+                          )}
+                        </div>
+                        <h5 className="font-bold text-slate-900 text-xs mt-0.5 leading-snug">
+                          {t.description}
+                        </h5>
+                      </div>
+                      <span className={`text-xs font-black shrink-0 ${
+                        t.type === TransactionType.REVENUE ? 'text-emerald-600' : 'text-rose-600'
+                      }`}>
+                        {t.type === TransactionType.REVENUE ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-200/60">
+                      <span className="truncate">{t.category}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`px-1.5 py-0.5 rounded font-bold uppercase text-[9px] ${
+                          t.account === 'FUNDO_RESERVA' ? 'bg-purple-100 text-purple-700' : 'bg-slate-200 text-slate-600'
+                        }`}>
+                          {t.account === 'FUNDO_RESERVA' ? 'F.R.' : 'Ord.'}
+                        </span>
+                        <button 
+                          onClick={() => handleDeleteTransaction(t.id)}
+                          className="text-slate-400 hover:text-rose-600"
+                          title="Excluir"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -701,12 +818,12 @@ const App: React.FC = () => {
 
         {/* ABA: RELATÓRIOS & FILTROS & BALANCETE PDF */}
         {activeTab === 'reports' && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
             {/* Filtros de Pesquisa Contábil */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="bg-white p-4 sm:p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-slate-800">
-                  <Filter size={18} className="text-indigo-600" />
+                  <Filter size={17} className="text-indigo-600" />
                   <h3 className="font-black uppercase tracking-tight text-xs">
                     Filtros de Auditoria & Período
                   </h3>
@@ -726,7 +843,7 @@ const App: React.FC = () => {
                     type="date"
                     value={filters.startDate}
                     onChange={e => setFilters({...filters, startDate: e.target.value})}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
                   />
                 </div>
                 <div>
@@ -735,7 +852,7 @@ const App: React.FC = () => {
                     type="date"
                     value={filters.endDate}
                     onChange={e => setFilters({...filters, endDate: e.target.value})}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
                   />
                 </div>
                 <div>
@@ -743,7 +860,7 @@ const App: React.FC = () => {
                   <select 
                     value={filters.type}
                     onChange={e => setFilters({...filters, type: e.target.value as any})}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
                   >
                     <option value="">Todas</option>
                     <option value={TransactionType.REVENUE}>Apenas Receitas</option>
@@ -755,7 +872,7 @@ const App: React.FC = () => {
                   <select 
                     value={filters.unitId}
                     onChange={e => setFilters({...filters, unitId: e.target.value as any})}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
                   >
                     <option value="">Todas 12 Unidades</option>
                     {UNITS.map(u => <option key={u} value={u}>Apto {u}</option>)}
@@ -764,10 +881,10 @@ const App: React.FC = () => {
                 <div className="flex items-end">
                   <button 
                     onClick={() => generateFinancialReport(filteredTransactions, 'Balancete do Recorte Selecionado')}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95"
+                    className="w-full flex items-center justify-center gap-2 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95"
                   >
                     <FileText size={15} />
-                    Exportar PDF Filtrado
+                    Exportar PDF
                   </button>
                 </div>
               </div>
@@ -775,13 +892,14 @@ const App: React.FC = () => {
 
             {/* Tabela do Recorte Filtrado */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                <h4 className="font-black text-slate-900 text-sm uppercase">
+              <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+                <h4 className="font-black text-slate-900 text-xs sm:text-sm uppercase">
                   Registros Selecionados ({filteredTransactions.length})
                 </h4>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Visualização Desktop */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50 text-[10px] uppercase font-black text-slate-500 border-b border-slate-100">
@@ -807,6 +925,23 @@ const App: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Visualização Mobile */}
+              <div className="md:hidden divide-y divide-slate-100 p-3 space-y-2">
+                {filteredTransactions.map(t => (
+                  <div key={t.id} className="p-3 bg-slate-50/70 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="min-w-0 pr-2">
+                      <p className="font-bold text-slate-800 truncate">{t.description}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {new Date(t.date).toLocaleDateString('pt-BR')} {t.unitId ? `• Apto ${t.unitId}` : ''}
+                      </p>
+                    </div>
+                    <span className={`font-black whitespace-nowrap text-xs ${t.type === TransactionType.REVENUE ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {t.type === TransactionType.REVENUE ? '+' : '-'} R$ {t.amount.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -814,10 +949,10 @@ const App: React.FC = () => {
 
       {/* Modal Novo Lançamento */}
       {isAdding && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 my-auto">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-black text-slate-900 text-base sm:text-lg uppercase tracking-tight">
                 Registrar Movimento Contábil
               </h3>
               <button onClick={() => setIsAdding(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500">
@@ -825,7 +960,7 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleAddTransaction} className="p-6 space-y-4">
+            <form onSubmit={handleAddTransaction} className="p-4 sm:p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               {/* Seletor Tipo: Entrada vs Saída */}
               <div className="flex bg-slate-100 p-1 rounded-2xl">
                 <button 
@@ -835,7 +970,7 @@ const App: React.FC = () => {
                     type: TransactionType.EXPENSE, 
                     category: EXPENSE_CATEGORIES[0]
                   })}
-                  className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all ${
+                  className={`flex-1 py-2 text-xs font-black rounded-xl transition-all ${
                     newTransaction.type === TransactionType.EXPENSE 
                       ? 'bg-white text-rose-600 shadow-sm' 
                       : 'text-slate-500'
@@ -850,7 +985,7 @@ const App: React.FC = () => {
                     type: TransactionType.REVENUE, 
                     category: REVENUE_CATEGORIES[0]
                   })}
-                  className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all ${
+                  className={`flex-1 py-2 text-xs font-black rounded-xl transition-all ${
                     newTransaction.type === TransactionType.REVENUE 
                       ? 'bg-white text-emerald-600 shadow-sm' 
                       : 'text-slate-500'
@@ -868,11 +1003,11 @@ const App: React.FC = () => {
                   placeholder="Ex: Sabesp, Manutenção Elevador, Taxa Apto 101..."
                   value={newTransaction.description || ''}
                   onChange={e => setNewTransaction({...newTransaction, description: e.target.value})}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Valor (R$)</label>
                   <input 
@@ -882,7 +1017,7 @@ const App: React.FC = () => {
                     placeholder="0.00"
                     value={newTransaction.amount || ''}
                     onChange={e => setNewTransaction({...newTransaction, amount: Number(e.target.value)})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
                 <div>
@@ -892,18 +1027,18 @@ const App: React.FC = () => {
                     type="date"
                     value={newTransaction.date}
                     onChange={e => setNewTransaction({...newTransaction, date: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Categoria</label>
                   <select 
                     value={newTransaction.category}
                     onChange={e => setNewTransaction({...newTransaction, category: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
                   >
                     {(newTransaction.type === TransactionType.REVENUE ? REVENUE_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -916,7 +1051,7 @@ const App: React.FC = () => {
                   <select 
                     value={newTransaction.account}
                     onChange={e => setNewTransaction({...newTransaction, account: e.target.value as any})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
                   >
                     <option value="ORDINARIA">Conta Ordinária</option>
                     <option value="FUNDO_RESERVA">Conta Fundo de Reserva</option>
@@ -931,7 +1066,7 @@ const App: React.FC = () => {
                   <select 
                     value={newTransaction.unitId || ''}
                     onChange={e => setNewTransaction({...newTransaction, unitId: e.target.value as any})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none"
                   >
                     <option value="">Lançamento Geral (Sem Unidade)</option>
                     {UNITS.map(u => <option key={u} value={u}>Apartamento {u}</option>)}
@@ -940,27 +1075,27 @@ const App: React.FC = () => {
               )}
 
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Comprovante / Número NF (Opcional)</label>
+                <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Comprovante / NF (Opcional)</label>
                 <input 
                   type="text"
                   placeholder="Ex: NF-e 4921 / TED 10293"
                   value={newTransaction.receiptNumber || ''}
                   onChange={e => setNewTransaction({...newTransaction, receiptNumber: e.target.value})}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
                 />
               </div>
 
-              <div className="pt-3 flex gap-3">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
                 <button 
                   type="button"
                   onClick={() => setIsAdding(false)}
-                  className="flex-1 py-3 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl"
+                  className="w-full sm:flex-1 py-2.5 text-xs font-bold text-slate-600 border border-slate-200 rounded-xl"
                 >
                   Descartar
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-3 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/20"
+                  className="w-full sm:flex-1 py-2.5 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/20"
                 >
                   Salvar e Conciliar
                 </button>
