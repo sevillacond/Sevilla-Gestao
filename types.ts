@@ -83,3 +83,44 @@ export interface CondoState {
     status: string;
   };
 }
+
+export interface MonthSimulationItem {
+  id: string; // '2021-03'
+  competence: string; // 'Março/2021'
+  dueDate: string; // '10/03/2021'
+  daysLate: number; // 1821
+  originalValue: number; // 365.66
+  fineValue: number; // 7.31
+  interestValue: number; // 221.96
+  totalValue: number; // 594.93
+  selected: boolean;
+}
+
+export interface SimulationParams {
+  residentName: string;
+  unitId: string;
+  cpf: string;
+  phone: string;
+  email: string;
+  monthlyFee: number;
+  finePercent: number; // default 2%
+  monthlyInterestPercent: number; // default 1%
+  dueDay: number; // default 10
+  calculationDate: string; // YYYY-MM-DD
+  sindicoName?: string;
+}
+
+export interface DebtAgreementParams {
+  totalOriginal: number;
+  totalMultas: number;
+  totalJuros: number;
+  totalGeral: number;
+  discountJurosPercent: number; // e.g. 0, 25, 50, 100
+  discountAmount: number;
+  effectiveTotal: number;
+  downPayment: number;
+  installmentsCount: number;
+  installmentValue: number;
+  firstDueDate: string; // YYYY-MM-DD
+  notes?: string;
+}

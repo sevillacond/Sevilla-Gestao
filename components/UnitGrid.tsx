@@ -9,13 +9,15 @@ interface UnitGridProps {
   monthlyFee: number;
   unitsData?: Record<UnitId, UnitDetails>;
   onRegisterPayment?: (unitId: UnitId, amount: number) => void;
+  onOpenSimulator?: (unitId: UnitId) => void;
 }
 
 export const UnitGrid: React.FC<UnitGridProps> = ({ 
   transactions, 
   monthlyFee,
   unitsData = DEFAULT_UNITS_DATA,
-  onRegisterPayment = (_unitId: UnitId, _amount: number) => {}
+  onRegisterPayment = (_unitId: UnitId, _amount: number) => {},
+  onOpenSimulator
 }) => {
   const [selectedUnit, setSelectedUnit] = useState<UnitDetails | null>(null);
 
@@ -164,6 +166,7 @@ export const UnitGrid: React.FC<UnitGridProps> = ({
             onRegisterPayment(unitId, amount);
             setSelectedUnit(null);
           }}
+          onOpenSimulator={onOpenSimulator}
         />
       )}
     </div>

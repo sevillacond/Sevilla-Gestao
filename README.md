@@ -78,8 +78,10 @@ Integração direta com o modelo **Gemini 3.8 Flash** via SDK `@google/genai`:
 
 Utilizando a biblioteca `jspdf` e `jspdf-autotable`, o sistema emite:
 1. **Balancete Mensal Oficial de Prestação de Contas:** Com demonstrativo sintético, detalhamento de lançamentos, conciliação do fundo de reserva e mapa de adimplência das 12 unidades.
-2. **Relatório de Auditoria de Posse e Transição de Gestão:** Documento formal assinado pelo Síndico.
-3. **Regimento Interno e Convenção Condominial:** Cópias autenticadas para consulta dos condôminos.
+2. **Demonstrativo Analítico de Taxas Condominiais em Atraso (Modelo Oficial):** Calculadora com paridade exata com o padrão oficial do Condomínio Residencial Sevilla (multa 2% + juros 1% a.m. *pro rata die*), paginação contínua (ex: caso de 60 meses com 3 páginas) e totalizador destacado.
+3. **Termo de Confissão e Parcelamento de Dívida Condominial:** Instrumento formal fundamentado no Art. 784, III e X do CPC (Título Executivo Extrajudicial), com cronograma de parcelamento, vencimento antecipado em caso de inadimplemento e linhas para assinaturas do Síndico, Morador e Testemunhas.
+4. **Relatório de Auditoria de Posse e Transição de Gestão:** Documento formal assinado pelo Síndico.
+5. **Regimento Interno e Convenção Condominial:** Cópias autenticadas para consulta dos condôminos.
 
 ---
 
@@ -91,19 +93,22 @@ Utilizando a biblioteca `jspdf` e `jspdf-autotable`, o sistema emite:
 │   ├── AuditAlertsBanner.tsx    # Banner de status de integridade contábil e laudos
 │   ├── AuditInspectionPanel.tsx # Painel de conformidade, laudos prediais e auditoria
 │   ├── DocumentationViewer.tsx  # Leitor e gerenciador de documentos, atas e normas
+│   ├── LateFeeSimulator.tsx     # Simulador de atrasos (2% + 1% pro rata), acordos e exportador PDF
 │   ├── SummaryCard.tsx          # Cards de KPI financeiro com badges de conta
-│   ├── UnitDetailModal.tsx      # Modal de cálculo moratório (2% + 1% juros) e Pix
+│   ├── UnitDetailModal.tsx      # Modal de detalhe da unidade, atalho para simulador e Pix
 │   └── UnitGrid.tsx             # Visualização arquitetônica por pavimento (101..304)
 ├── constants.ts                 # Constantes institucionais, 12 unidades, seed data e laudos
 ├── docs/                        # Documentação textual arquivada do condomínio
 │   ├── AUDITORIA_INICIAL.md     # Relatório de posse e diagnóstico dos 100 dias
 │   ├── REGIMENTO_INTERNO.md     # Normas de convivência, garagem e horários
 │   ├── CONVENCAO.md             # Frações ideais (1/12) e estatuto do edifício
-│   └── MANUAL_GOVERNANCA.md     # Especificação técnica e políticas LGPD
+│   ├── MANUAL_GOVERNANCA.md     # Especificação técnica, LGPD e módulo de simulação
+│   └── DEPLOY_VERCEL.md         # Manual de deploy na Vercel e produção
 ├── services/
 │   ├── geminiService.ts         # Integração com Gemini 3.8 Flash e parecer de IA
-│   └── pdfService.ts            # Gerador de relatórios e balancetes em PDF oficial
+│   └── pdfService.ts            # Gerador de relatórios, balancetes, taxas em atraso e acordos
 ├── types.ts                     # Definições de tipos estritos do TypeScript
+├── vercel.json                  # Configuração de build e SPA routing para Vercel
 ├── index.html                   # Entry point com tipografia Inter e metatags
 ├── index.tsx                    # Montagem React 19
 ├── metadata.json                # Metadados da aplicação no AI Studio

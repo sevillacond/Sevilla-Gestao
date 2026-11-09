@@ -85,3 +85,34 @@ O módulo `AuditInspectionPanel` verifica:
 * Certificado semestral de limpeza de caixas d'água;
 * Relatório de Inspeção Anual (RIA) do elevador Atlas Schindler;
 * Laudo de medição ôhmica do para-raios (SPDA ABNT NBR 5419).
+
+---
+
+## 6. Módulo Simulador de Taxas e Atrasos (`LateFeeSimulator.tsx`)
+Concebido para calcular débitos acumulados e gerar demonstrativos oficiais em PDF idênticos ao padrão adotado na sindicatura do Residencial Sevilla:
+- **Parâmetros de Cálculo:**
+  - Taxa base padrão: R$ 365,66 (ou cota parametrizada pelo síndico);
+  - Multa moratória: 2,00% sobre o principal (Art. 1.336, § 1º CC);
+  - Juros de mora: 1,00% a.m. *pro rata die* $\left(\frac{1\%}{30} \times \text{dias de atraso} \times \text{taxa}\right)$;
+  - Contagem de dias: Diferença em dias corridos entre o vencimento (dia 10) e a data do cálculo;
+- **Preset de Referência (Apto 304 - Caroline Rabelo):**
+  - Período: 60 meses (Março/2021 a Fevereiro/2026);
+  - Total Original: R$ 21.939,60 | Multas: R$ 438,79 | Juros: R$ 6.744,72 | **TOTAL: R$ 29.123,11**;
+- **Demonstrativo em PDF Oficial:**
+  - Cabeçalho navy com brasão e dados do condomínio;
+  - Quadro de dados cadastrais e parâmetros de cálculo;
+  - Tabela com paginação automática e 7 colunas analíticas;
+  - Quadro de resumo consolidado com destaque e notas jurídicas.
+
+---
+
+## 7. Acordos de Cobrança e Título Executivo Extrajudicial (`generateDebtAgreementPDF`)
+Com base no **Art. 784, incisos III e X do Código de Processo Civil (Lei 13.105/2015)**:
+- O módulo permite simular planos de pagamento amigável:
+  - Entrada inicial negociada (R$);
+  - Parcelamento em até 36 vezes mensais fixas;
+  - Eventual desconto condicionado sobre os juros de mora (0% a 100% dos juros para pagamento à vista);
+- Emissão instantânea do **Termo de Confissão e Parcelamento de Dívida**:
+  - Cláusula de confissão irrevogável e irretratável da dívida líquida, certa e exigível;
+  - Cláusula resolutiva com vencimento antecipado das parcelas em caso de inadimplemento superior a 10 dias;
+  - Espaço formal para assinatura do Síndico, Devedor(a) e duas Testemunhas instrumentárias.

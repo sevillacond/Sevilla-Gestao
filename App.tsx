@@ -4,7 +4,7 @@ import {
   ShieldCheck, Sparkles, PlusCircle, RefreshCcw, Trash2, 
   CheckCircle2, Info, Filter, Calendar, Search, XCircle,
   Building2, Coins, ArrowUpRight, Download, CreditCard, ChevronRight,
-  Menu, X, Globe
+  Menu, X, Globe, Calculator
 } from 'lucide-react';
 import { 
   Transaction, TransactionType, CondoState, UnitId, 
@@ -15,6 +15,7 @@ import { UnitGrid } from './components/UnitGrid';
 import { AuditAlertsBanner } from './components/AuditAlertsBanner';
 import { AuditInspectionPanel } from './components/AuditInspectionPanel';
 import { DocumentationViewer } from './components/DocumentationViewer';
+import { LateFeeSimulator } from './components/LateFeeSimulator';
 import { 
   REVENUE_CATEGORIES, EXPENSE_CATEGORIES, UNITS, 
   CONDO_INFO, INITIAL_CONDO_STATE 
@@ -38,12 +39,20 @@ const App: React.FC = () => {
     return INITIAL_CONDO_STATE;
   });
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports' | 'simulation'>('dashboard');
+  const [simulatorTargetUnit, setSimulatorTargetUnit] = useState<UnitId | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+
+  const handleOpenSimulatorForUnit = (unitId: UnitId) => {
+    setSimulatorTargetUnit(unitId);
+    setActiveTab('simulation');
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Filtros da aba de relatórios / lançamentos
   const [filters, setFilters] = useState({
@@ -229,7 +238,7 @@ const App: React.FC = () => {
   };
 
   interface NavItem {
-    id: 'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports';
+    id: 'dashboard' | 'units' | 'transactions' | 'audit' | 'documents' | 'reports' | 'simulation';
     label: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
     badge?: string;
@@ -238,6 +247,7 @@ const App: React.FC = () => {
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'units', label: '12 Unidades', icon: UserCheck, badge: '101..304' },
+    { id: 'simulation', label: 'Simulador Atrasos', icon: Calculator, badge: 'PDF' },
     { id: 'transactions', label: 'Lançamentos', icon: Receipt },
     { id: 'audit', label: 'Auditoria & Laudos', icon: ShieldCheck, badge: '6 Laudos' },
     { id: 'documents', label: 'Dossiê & Atas', icon: FileText },
@@ -472,6 +482,7 @@ const App: React.FC = () => {
               {activeTab === 'audit' && 'Auditoria & Compliance Predial'}
               {activeTab === 'documents' && 'Dossiê, Regimento & Atas'}
               {activeTab === 'reports' && 'Relatórios & Balancete PDF'}
+              {activeTab === 'simulation' && 'Simulador de Taxas & Atrasos'}
             </h2>
           </div>
 
@@ -662,6 +673,7 @@ const App: React.FC = () => {
                 monthlyFee={state.monthlyFee}
                 unitsData={state.units}
                 onRegisterPayment={handleRegisterUnitPayment}
+                onOpenSimulator={handleOpenSimulatorForUnit}
               />
             </div>
           </div>
@@ -956,6 +968,15 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ABA: SIMULADOR DE ATRASOS & TAXAS */}
+        {activeTab === 'simulation' && (
+          <LateFeeSimulator 
+            unitsData={state.units} 
+            targetUnitId={simulatorTargetUnit}
+            onResetTargetUnit={() => setSimulatorTargetUnit(null)}
+          />
         )}
       </main>
 

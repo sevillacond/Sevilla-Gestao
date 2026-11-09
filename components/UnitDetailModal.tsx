@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, User, Mail, Phone, Car, Shield, CheckCircle2, 
-  AlertCircle, Copy, MessageCircle, Receipt, Calendar
+  AlertCircle, Copy, MessageCircle, Receipt, Calendar, Calculator
 } from 'lucide-react';
 import { UnitId, UnitDetails, Transaction, TransactionType } from '../types';
 import { CONDO_INFO } from '../constants';
@@ -12,6 +12,7 @@ interface UnitDetailModalProps {
   monthlyFee: number;
   onClose: () => void;
   onRegisterPayment: (unitId: UnitId, amount: number) => void;
+  onOpenSimulator?: (unitId: UnitId) => void;
 }
 
 export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
@@ -19,7 +20,8 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
   transactions,
   monthlyFee,
   onClose,
-  onRegisterPayment
+  onRegisterPayment,
+  onOpenSimulator
 }) => {
   const [copiedPix, setCopiedPix] = useState(false);
   const [copiedMessage, setCopiedMessage] = useState(false);
@@ -194,6 +196,21 @@ Após o envio, o comprovante pode ser remetido para este contato para baixa auto
                   <span>{copiedPix ? 'Chave Copiada!' : `Pix Oficial (${CONDO_INFO.email})`}</span>
                 </button>
               </div>
+
+              {/* Botão de Transição para o Simulador Completo com Geração de PDF */}
+              {onOpenSimulator && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSimulator(unit.id);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-black transition-all shadow-sm active:scale-95"
+                >
+                  <Calculator size={15} />
+                  <span>Abrir no Simulador Detalhado & Gerar PDF do Demonstrativo</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -269,10 +286,23 @@ Após o envio, o comprovante pode ser remetido para este contato para baixa auto
         </div>
 
         {/* Rodapé */}
-        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+          {onOpenSimulator && (
+            <button 
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenSimulator(unit.id);
+              }}
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-indigo-600 hover:text-indigo-800 font-bold text-xs transition-colors"
+            >
+              <Calculator size={14} />
+              <span>Simular Débitos / Gerar PDF</span>
+            </button>
+          )}
           <button 
             onClick={onClose}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 text-xs transition-colors"
+            className="w-full sm:w-auto px-6 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-200 text-xs transition-colors sm:ml-auto"
           >
             Fechar
           </button>
